@@ -365,7 +365,7 @@ var ViewModel = function () {
             atLeastOne = true
             // Create a mini infowindow to open immediately and contain the
             // distance and duration
-            var content = durationText + ' away, ' + distanceText
+            var content = `<b>${self.stationsList()[i].name}</b><br>${durationText} away, ${distanceText}`
             self.stationsList()[i].showInfoWindow(content)
           }
         }
