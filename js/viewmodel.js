@@ -282,13 +282,20 @@ var ViewModel = function () {
   //   }
   // }
 
-  this.selectStation = function (station) {
+  this.selectStation = function(station) {
     map.setCenter(station.marker.position)
     map.setZoom(13)
-    station.showMarker()
+    self.hideAllInfoWindows()
+    station.showInfoWindow()
   }
 
-  this.hideMarkers = function () {
+  this.hideAllInfoWindows = function() {
+    self.stationsList().forEach(function(station) {
+      station.infoWindow.close()
+    })
+  }
+
+  this.hideMarkers = function() {
     self.stationsList().forEach(function(station) {
       station.visible(false)
     })
@@ -301,7 +308,7 @@ var ViewModel = function () {
   // Search Within Time
   this.stationsWithinTime = ko.observableArray([])
 
-  this.searchWithinTime = function () {
+  this.searchWithinTime = function() {
     self.stationsWithinTime([])
     var distanceMatrixService = new google.maps.DistanceMatrixService
     var address = $('#search-within-time-text').val()
