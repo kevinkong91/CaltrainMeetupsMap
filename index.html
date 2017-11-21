@@ -6,6 +6,7 @@
     <title>Caltrain Map</title>
     <link rel="stylesheet" href="static/styles.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/balloon-css/0.5.0/balloon.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
   </head>
@@ -25,7 +26,11 @@
           <nav class="over-map hoverable">
             <div class="nav-wrapper white">
               <ul class="left hide-on-sm-and-down red lighten-1">
-                <li><a href='#' data-bind="click: toggleStationsList"><i class="material-icons">menu</i></a></li>
+                <li>
+                  <a href='#' data-bind="click: toggleStationsList">
+                    <i class="material-icons">menu</i>
+                  </a>
+                </li>
               </ul>
               <form class="col s7 m8 l10">
                 <div class="input-field">
@@ -33,8 +38,16 @@
                 </div>
               </form>
               <ul class="right hide-on-sm-and-down red lighten-1">
-                <li><a href='#' data-bind="click: clearFilters"><i class="material-icons">delete</i></a></li>
-                <li><a href="#" data-bind="click: toggleFilterOptions"><i class="material-icons">filter_list</i></a></li>
+                <li>
+                  <a href='#' data-bind="click: clearFilters" data-balloon="Clear Filters" data-balloon-pos="down">
+                    <i class="material-icons">delete</i>
+                  </a>
+                </li>
+                <li>
+                  <a href="#" data-bind="click: toggleFilterOptions" data-balloon="Toggle Filters" data-balloon-pos="down">
+                    <i class="material-icons">filter_list</i>
+                  </a>
+                </li>
               </ul>
             </div>
           </nav>
