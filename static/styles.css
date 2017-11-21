@@ -1,0 +1,121 @@
+html,
+body {
+  font-family: Arial, sans-serif;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+input {
+  font-size: 12px;
+}
+
+h1 {
+  color: #525454;
+  font-size: 22px;
+  margin: 0 0 10px 0;
+  text-align: center;
+}
+
+hr {
+  background: #D0D7D9;
+  height: 1px;
+  margin: 20px 0 20px 0;
+  border: none;
+}
+
+.over-map {
+  width: 98%;
+  position: absolute;
+  z-index: 100;
+}
+
+nav.over-map {
+  top: 10px;
+  left: 10px;
+}
+
+#map {
+  top: 0px;
+  bottom: 0px;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  right: 0px;
+}
+
+.stations-box {
+  background: #fff;
+  border: 1px solid #999;
+  border-radius: 3px;
+  position: absolute;
+  top: 85px;
+  left: 10px;
+  height: 80%;
+  line-height: 35px;
+  padding: 10px 10px 10px 10px;
+  text-align: left;
+  overflow: auto;
+}
+
+#pano {
+  width: 200px;
+  height: 200px;
+}
+
+#places-search,
+#search-within-time-text {
+  width: 84%;
+}
+
+.filter-options {
+  position: absolute;
+  top: 80px;
+  right: 10px;
+  height: auto;
+  width: 40%;
+}
+
+.white-bg {
+  background-color: #fff;
+}
+
+.right {
+  text-align: right;
+}
+
+ul {
+  list-style: none;
+}
+
+ul a {
+  color: #e57373;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.text {
+  font-size: 12px;
+  color: #e57373;
+}
+
+#toggle-drawing {
+  width: 27%;
+  position: relative;
+  margin-left: 10px;
+}
+
+#zoom-to-area-text {
+  width: 70%;
+}
+
+#zoom-to-area {
+  width: 24%;
+}
