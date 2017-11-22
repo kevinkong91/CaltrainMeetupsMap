@@ -1,6 +1,12 @@
 # Caltrain & Meetups Map
 This web app helps you find the right Caltrain stations to take for that meetup you want to attend.
 
+## Screenshots
+#### Meetups View
+![Meetup View](static/screenshots/screenshot_meetup.png "Meetup View")
+
+#### Filtered Stations View
+![Filtered Stations View](static/screenshots/screenshot_filter.png "Filtered Stations View")
 
 ## Features
 * Select each station to see the numerous tech meetups happening near the station within the next 2 weeks.
