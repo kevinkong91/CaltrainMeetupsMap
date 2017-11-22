@@ -252,6 +252,9 @@ var ViewModel = function () {
   data.stops.forEach(function(station) {
     var newStation = new Station(station)
     self.stationsList.push(newStation)
+    newStation.marker.addListener('click', function () {
+      self.selectStation(newStation)
+    })
     newStation.showMarker()
   })
 
@@ -274,19 +277,16 @@ var ViewModel = function () {
     })
   }
 
-  // this.listToggle = function() {
-  //   if(self.toggleSymbol() === 'hide') {
-  //       self.toggleSymbol('show');
-  //   } else {
-  //       self.toggleSymbol('hide');
-  //   }
-  // }
-
   this.selectStation = function(station) {
     map.setCenter(station.marker.position)
     map.setZoom(13)
     self.hideAllInfoWindows()
+    station.marker.setAnimation(google.maps.Animation.BOUNCE)
+    setTimeout(function() {
+      station.marker.setAnimation(null)
+    }, 800)
     station.showInfoWindow()
+    station.findNearbyEvents()
   }
 
   this.hideAllInfoWindows = function() {

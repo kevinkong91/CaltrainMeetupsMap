@@ -34,16 +34,6 @@ var Station = function(data) {
     return true
   }, this)
 
-  this.marker.addListener('click', function(){
-    self.showInfoWindow()
-    self.marker.setAnimation(google.maps.Animation.BOUNCE)
-    setTimeout(function() {
-        self.marker.setAnimation(null)
-    }, 2100)
-    map.setCenter(this.position)
-    map.setZoom(13)
-  })
-
   this.bounce = function(place) {
     google.maps.event.trigger(self.marker, 'click')
   }
