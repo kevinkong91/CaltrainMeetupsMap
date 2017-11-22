@@ -165,6 +165,7 @@ var ViewModel = function () {
   // Searches for what user typed in the input bar using the locationlist array.
   // Only displaying the exact item results that user type if available in the locationlist array.
   this.filteredList = ko.computed( function() {
+    var bounds = new google.maps.LatLngBounds()
     return ko.utils.arrayFilter(self.stationsList(), function(station) {
       // Hide all Meetup markers
       station.hideMeetupMarkers()
@@ -172,21 +173,33 @@ var ViewModel = function () {
       // Default: show all stations
       var resultZone = true
       var resultFilter = true
+
       // Filter out by zone
       if (typeof self.selectedZone() === 'number') {
         resultZone = (self.selectedZone() == station.zoneId)
       }
+
       // Filter out by query string match
       var filter = self.searchQuery().toLowerCase()
       if (filter) {
         var string = station.name.toLowerCase()
         resultFilter = (string.search(filter) >= 0)
       }
+
       // If user sets Zone && a string query, positive results should match both
-      var result = resultZone && resultFilter
+      var shouldBeVisible = resultZone && resultFilter
+
       // Show/hide station
-      station.visible(result)
-      return result
+      station.visible(shouldBeVisible)
+
+      // Expand the map to show the filtered Station
+      if (shouldBeVisible) {
+        bounds.extend(station.marker.position)
+        map.fitBounds(bounds)
+      }
+
+      // Return result
+      return shouldBeVisible
     })
   }, self)
 }
