@@ -281,10 +281,6 @@ var ViewModel = function () {
     map.setCenter(station.marker.position)
     map.setZoom(13)
     self.hideAllInfoWindows()
-    station.marker.setAnimation(google.maps.Animation.BOUNCE)
-    setTimeout(function() {
-      station.marker.setAnimation(null)
-    }, 800)
     station.showInfoWindow()
     station.findNearbyEvents()
   }
