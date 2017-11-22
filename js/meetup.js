@@ -14,7 +14,7 @@ var Meetup = function(data) {
     return (this.fee > 0) ? `${this.fee}` : 'Free'
   }, this)
 
-  this.visible = ko.observable(true)
+  this.visible = ko.observable(false)
 
   this.contentString = `
     <div class="info-window-content">
@@ -45,20 +45,6 @@ var Meetup = function(data) {
     else this.marker.setMap(null)
     return true
   }, this)
-
-  this.marker.addListener('click', function(){
-    self.showInfoWindow()
-    self.marker.setAnimation(google.maps.Animation.BOUNCE)
-    setTimeout(function() {
-        self.marker.setAnimation(null)
-    }, 2100)
-    map.setCenter(this.position)
-    map.setZoom(13)
-  })
-
-  this.bounce = function(place) {
-    google.maps.event.trigger(self.marker, 'click')
-  }
 }
 
 function makeMarkerIcon() {

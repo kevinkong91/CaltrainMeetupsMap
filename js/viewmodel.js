@@ -249,13 +249,14 @@ var ViewModel = function () {
     mapTypeControl: false
   })
 
-  data.stops.forEach(function(station) {
-    var newStation = new Station(station)
-    self.stationsList.push(newStation)
-    newStation.marker.addListener('click', function () {
-      self.selectStation(newStation)
+  data.stops.forEach(function(stop) {
+    var station = new Station(stop)
+    station.findNearbyEvents()
+    station.showMarker()
+    station.marker.addListener('click', function () {
+      self.selectStation(station)
     })
-    newStation.showMarker()
+    self.stationsList.push(station)
   })
 
   var searchBox = new google.maps.places.SearchBox(document.getElementById('search-within-time-text'));
@@ -279,19 +280,28 @@ var ViewModel = function () {
 
   this.selectStation = function(station) {
     map.setCenter(station.marker.position)
-    map.setZoom(13)
-    self.hideAllInfoWindows()
+    map.setZoom(12)
+    self.hideStationInfoWindows()
+    self.hideMeetupMarkers()
     station.showInfoWindow()
-    station.findNearbyEvents()
+    station.showNearbyMeetups()
   }
 
-  this.hideAllInfoWindows = function() {
+  this.hideStationInfoWindows = function() {
     self.stationsList().forEach(function(station) {
       station.infoWindow.close()
     })
   }
 
-  this.hideMarkers = function() {
+  this.hideMeetupMarkers = function() {
+    self.stationsList().forEach(function(station) {
+      station.meetupsList().forEach(function(meetup) {
+        meetup.visible(false)
+      })
+    })
+  }
+
+  this.hideStationMarkers = function() {
     self.stationsList().forEach(function(station) {
       station.visible(false)
     })
@@ -312,7 +322,7 @@ var ViewModel = function () {
     if (address == '') {
       window.alert('You must enter an address.')
     } else {
-      self.hideMarkers()
+      self.hideStationMarkers()
       // Use the distance matrix service to calculate the duration of the
       // routes between all our markers, and the destination address entered
       // by the user. Then put all the origins into an origin matrix.

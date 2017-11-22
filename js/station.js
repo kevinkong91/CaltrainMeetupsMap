@@ -5,20 +5,32 @@ var Station = function(data) {
   this.zoneId = data.tags.zone_id
 
   this.meetupsList = ko.observableArray([])
+  this.meetupCount = ko.computed(function() {
+    return `${self.meetupsList().length} Meetups`
+  })
+  this.meetupError = ko.observable()
+
+  this.meetupSummary = function() {
+    return (this.meetupError()) ? 'Error fetching meetups' : this.meetupCount()
+  }
 
   this.visible = ko.observable(true)
 
-  this.contentString = `
-    <div class="info-window-content">
-      <div class="title"><b>${self.name}</b></div>
-      <div class="content">Zone ${self.zoneId}</div>
-    </div>
-  `
+  this.contentString = ko.computed(function() {
+    let meetupSummary = self.meetupSummary()
+    return `
+      <div class="info-window-content">
+        <div class="title"><b>${self.name}</b></div>
+        <div class="content">Zone ${self.zoneId}</div>
+        <div>${meetupSummary}</div>
+      </div>
+    `
+  })
 
   this.infoWindow = new google.maps.InfoWindow({content: self.contentString})
 
   this.showInfoWindow = function (content) {
-    var contentString = content || self.contentString
+    var contentString = content || self.contentString()
     self.infoWindow.setContent(contentString)
     self.infoWindow.open(map, self.marker)
     self.bounceAnimate()
@@ -44,11 +56,11 @@ var Station = function(data) {
     }, 800)
   }
 
-  // Eventbrite API
+  // Nearby Meetups via Meetup.com API
 
   this.findNearbyEvents = function() {
     let endpoint = 'https://api.meetup.com/2/open_events'
-    let token = '7d53333072471944b335302f5c4124'
+    let token = '2d1c23197e67393631564114153f3b31'
     let maxDistance = '1'
     let currentTime = new Date().getTime() / 1000
     let url = `${endpoint}?key=${token}&category=34&lat=${self.location.lat}&lon=${self.location.lng}&radius=${maxDistance}&time=,2w`
@@ -65,16 +77,42 @@ var Station = function(data) {
         console.log(response)
         if (response.results && response.results.length > 0) {
           response.results.forEach(function(item) {
-            var meetup = new Meetup(item)
-            self.meetupsList.push(meetup)
-            meetup.showMarker()
+            self.addMeetup(item)
           })
         }
       },
       error: function(xhr, status, error) {
-        console.log(error)
+        self.meetupError(error)
       }
     })
-    
+  }
+
+  this.addMeetup = function(item) {
+    let meetup = new Meetup(item)
+    meetup.marker.addListener('click', function () {
+      self.selectMeetup(meetup)
+    })
+    self.meetupsList.push(meetup)
+  }
+
+  this.showNearbyMeetups = function() {
+    self.meetupsList().forEach(function(meetup) {
+      meetup.visible(true)
+      meetup.showMarker()
+    })
+  }
+
+  this.selectMeetup = function(meetup) {
+    map.setCenter(meetup.marker.position)
+    map.setZoom(12)
+    self.infoWindow.close()
+    self.hideAllMeetupInfoWindows()
+    meetup.showInfoWindow()
+  }
+
+  this.hideAllMeetupInfoWindows = function() {
+    self.meetupsList().forEach(function(meetup) {
+      meetup.infoWindow.close()
+    })
   }
 }
