@@ -171,23 +171,23 @@ var ViewModel = function () {
       station.hideMeetupMarkers()
       
       // Default: show all stations
-      var resultZone = true
-      var resultFilter = true
+      var isInZone = true
+      var matchesSearchQuery = true
 
       // Filter out by zone
       if (typeof self.selectedZone() === 'number') {
-        resultZone = (self.selectedZone() == station.zoneId)
+        isInZone = (self.selectedZone() == station.zoneId)
       }
 
       // Filter out by query string match
       var filter = self.searchQuery().toLowerCase()
       if (filter) {
         var string = station.name.toLowerCase()
-        resultFilter = (string.search(filter) >= 0)
+        matchesSearchQuery = (string.search(filter) >= 0)
       }
 
       // If user sets Zone && a string query, positive results should match both
-      var shouldBeVisible = resultZone && resultFilter
+      var shouldBeVisible = isInZone && matchesSearchQuery
 
       // Show/hide station
       station.visible(shouldBeVisible)
