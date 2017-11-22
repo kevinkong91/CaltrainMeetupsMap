@@ -10,7 +10,7 @@ var Station = function(data) {
   // Meetup text in English
   this.meetupCount = ko.computed(function() {
     return `${self.meetupsList().length} Meetups`;
-  });
+  }, this);
   // Container for possible API errors
   this.meetupError = ko.observable();
 
@@ -30,10 +30,10 @@ var Station = function(data) {
         <div>${self.meetupSummary()}</div>
       </div>
     `;
-  });
+  }, this);
 
   // Initialize infoWindow
-  this.infoWindow = new google.maps.InfoWindow({content: self.contentString});
+  this.infoWindow = new google.maps.InfoWindow({content: self.contentString()});
 
   // Show InfoWindow
   this.showInfoWindow = function (content) {

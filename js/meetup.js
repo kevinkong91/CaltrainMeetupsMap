@@ -35,10 +35,10 @@ var Meetup = function(data, source) {
         <div>${self.time.toDateString()} | ${self.price()}</div>
       </div>
     `;
-  });
+  }, this);
 
   // Initialize infoWindow
-  this.infoWindow = new google.maps.InfoWindow({content: self.contentString});
+  this.infoWindow = new google.maps.InfoWindow({content: self.contentString()});
 
   // Show InfoWindow
   this.showInfoWindow = function (content) {
