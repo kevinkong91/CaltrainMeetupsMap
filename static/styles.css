@@ -65,12 +65,6 @@ nav.over-map {
   overflow: auto;
 }
 
-#pano {
-  width: 200px;
-  height: 200px;
-}
-
-#places-search,
 #search-within-time-text {
   width: 84%;
 }
@@ -104,18 +98,4 @@ ul a {
 .text {
   font-size: 12px;
   color: #e57373;
-}
-
-#toggle-drawing {
-  width: 27%;
-  position: relative;
-  margin-left: 10px;
-}
-
-#zoom-to-area-text {
-  width: 70%;
-}
-
-#zoom-to-area {
-  width: 24%;
 }
