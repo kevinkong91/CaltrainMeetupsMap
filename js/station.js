@@ -17,12 +17,11 @@ var Station = function(data) {
   this.visible = ko.observable(true)
 
   this.contentString = ko.computed(function() {
-    let meetupSummary = self.meetupSummary()
     return `
       <div class="info-window-content">
         <div class="title"><b>${self.name}</b></div>
         <div class="content">Zone ${self.zoneId}</div>
-        <div>${meetupSummary}</div>
+        <div>${self.meetupSummary()}</div>
       </div>
     `
   })
@@ -56,14 +55,21 @@ var Station = function(data) {
     }, 800)
   }
 
-  // Nearby Meetups via Meetup.com API
+  // Nearby Meetups via Meetup.com / Eventbrite
 
   this.findNearbyEvents = function() {
     let endpoint = 'https://api.meetup.com/2/open_events'
     let token = '2d1c23197e67393631564114153f3b31'
     let maxDistance = '1'
-    let currentTime = new Date().getTime() / 1000
-    let url = `${endpoint}?key=${token}&category=34&lat=${self.location.lat}&lon=${self.location.lng}&radius=${maxDistance}&time=,2w`
+    let params = $.param({
+      key: token,
+      category: '34',
+      lat: self.location.lat,
+      lon: self.location.lng,
+      radius: maxDistance,
+      time: ',2w'
+    })
+    let url = `${endpoint}?${params}`
     $.ajax({
       url: url,
       headers: {
@@ -74,10 +80,10 @@ var Station = function(data) {
       crossDomain: true,
       dataType: 'jsonp',
       success: function(response) {
-        console.log(response)
+        console.log(self.name, response.results.length)
         if (response.results && response.results.length > 0) {
           response.results.forEach(function(item) {
-            self.addMeetup(item)
+            self.addMeetup(item, 'meetup')
           })
         }
       },
@@ -85,10 +91,45 @@ var Station = function(data) {
         self.meetupError(error)
       }
     })
+
+    // let endpoint = 'https://www.eventbriteapi.com/v3/events/search/'
+    // let token = 'IDTYBW4ED3T2FYOJCHIA'
+    // let maxDistance = '5mi'
+    // let params = $.param({
+    //   token: token,
+    //   categories: '102',
+    //   'location.latitude': self.location.lat,
+    //   'location.longitude': self.location.lng,
+    //   'location.within': maxDistance,
+    //   'start_date.keyword': 'this_week'
+    // })
+    // let url = `${endpoint}?${params}`
+    // console.log(url)
+    
+    // $.ajax({
+    //   url: url,
+    //   headers: {
+    //     'Content-Type': 'application/x-www-form-urlencoded'
+    //   },
+    //   type: 'GET',
+    //   dataType: 'json',
+    //   success: function(response) {
+    //     console.log(response)
+    //     if (response.events && response.events.length > 0) {
+    //       response.results.forEach(function(item) {
+    //         self.addMeetup(item)
+    //       })
+    //     }
+    //   },
+    //   error: function(xhr, status, error) {
+    //     console.log(xhr)
+    //     self.meetupError(error)
+    //   }
+    // })
   }
 
-  this.addMeetup = function(item) {
-    let meetup = new Meetup(item)
+  this.addMeetup = function(item, source) {
+    let meetup = new Meetup(item, source)
     meetup.marker.addListener('click', function () {
       self.selectMeetup(meetup)
     })
@@ -104,7 +145,6 @@ var Station = function(data) {
 
   this.selectMeetup = function(meetup) {
     map.setCenter(meetup.marker.position)
-    map.setZoom(12)
     self.infoWindow.close()
     self.hideAllMeetupInfoWindows()
     meetup.showInfoWindow()

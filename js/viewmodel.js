@@ -281,20 +281,14 @@ var ViewModel = function () {
   this.selectStation = function(station) {
     map.setCenter(station.marker.position)
     map.setZoom(12)
-    self.hideStationInfoWindows()
-    self.hideMeetupMarkers()
+    self.clearAllDetails()
     station.showInfoWindow()
     station.showNearbyMeetups()
   }
 
-  this.hideStationInfoWindows = function() {
+  this.clearAllDetails = function() {
     self.stationsList().forEach(function(station) {
       station.infoWindow.close()
-    })
-  }
-
-  this.hideMeetupMarkers = function() {
-    self.stationsList().forEach(function(station) {
       station.meetupsList().forEach(function(meetup) {
         meetup.visible(false)
       })
