@@ -6,6 +6,7 @@ var ViewModel = function () {
   this.searchQuery = ko.observable('')  
   this.stationsList = ko.observableArray([])
 
+  // Initialize Google Map object
   map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 37.6021349, lng: -122.275478},
     zoom: 10,
@@ -13,52 +14,70 @@ var ViewModel = function () {
     mapTypeControl: false
   })
 
+  // Initialize Data
   data.stops.forEach(function(stop) {
+    //JSON-to-Station mapping
     var station = new Station(stop)
+    // Fetch Meetup data for each station
     station.findNearbyEvents()
+    // Display all relevation markers
     station.showMarker()
+    // Add listener for Station selection
     station.marker.addListener('click', function () {
       self.selectStation(station)
     })
+    // Populate Station collection
     self.stationsList.push(station)
   })
 
+  // Create Search Box for searchWithinTime input
   var searchBox = new google.maps.places.SearchBox(document.getElementById('search-within-time-text'));
   searchBox.setBounds(map.getBounds())
 
+  // Toggle for Station Menu
   this.toggleStationsList = function() {
     $('.stations-box').slideToggle()
   }
 
+  // Toggle for Filter Menu
   this.toggleFilterOptions = function() {
     $('.filter-options').slideToggle()
   }
 
+  // Clear all set filters
   this.clearFilters = function() {
     this.searchQuery('')
     this.selectedZone(null)
-    this.stationsList().forEach(function(station) {
-      station.infoWindow.close()
-    })
+    self.clearAllDetails()
   }
 
+  // Select a Station
   this.selectStation = function(station) {
+    // Move map to selected station
     map.setCenter(station.marker.position)
     map.setZoom(12)
+
+    // Clear all previous details
     self.clearAllDetails()
+
+    // Show Station & Meetup info
     station.showInfoWindow()
     station.showNearbyMeetups()
   }
 
+  // Clear all infoWindows and meetups
   this.clearAllDetails = function() {
     self.stationsList().forEach(function(station) {
+      // Close station info
       station.infoWindow.close()
+      // Close all nearby meetup info
       station.meetupsList().forEach(function(meetup) {
         meetup.visible(false)
       })
     })
   }
 
+  // Hide markers when filtered out
   this.hideStationMarkers = function() {
     self.stationsList().forEach(function(station) {
       station.visible(false)
@@ -73,13 +92,17 @@ var ViewModel = function () {
   this.stationsWithinTime = ko.observableArray([])
 
   this.searchWithinTime = function() {
+    // Clear previous results
     self.stationsWithinTime([])
+    // Initialize GoogleMaps DistanceMatrix
     var distanceMatrixService = new google.maps.DistanceMatrixService
     var address = $('#search-within-time-text').val()
     
     if (address == '') {
+      // Handle invalid input
       window.alert('You must enter an address.')
     } else {
+      // Clear all previous markers
       self.hideStationMarkers()
       // Use the distance matrix service to calculate the duration of the
       // routes between all our markers, and the destination address entered
@@ -97,6 +120,7 @@ var ViewModel = function () {
         if (status !== google.maps.DistanceMatrixStatus.OK) {
           window.alert('Error was: ' + status)
         } else {
+          // Success response
           self.displayMarkersWithinTime(response)
         }
       })
@@ -136,6 +160,7 @@ var ViewModel = function () {
       })
     }
     if (!atLeastOne) {
+      // No matching results found
       window.alert('We could not find any locations within that distance!');
     }
   }
@@ -146,21 +171,26 @@ var ViewModel = function () {
     return ko.utils.arrayFilter(self.stationsList(), function(station) {
       var resultZone = true
       var resultFilter = true
+      // Check zone filter
       if (typeof self.selectedZone() === 'number') {
         resultZone = (self.selectedZone() == station.zoneId)
       }
+      // Check string query filter
       var filter = self.searchQuery().toLowerCase()
       if (filter) {
         var string = station.name.toLowerCase()
         resultFilter = (string.search(filter) >= 0)
       }
+      // If user sets Zone && a string query, positive results should match both
       var result = resultZone && resultFilter
+      // Show/hide station
       station.visible(result)
       return result
     })
   }, self)
 }
 
+// Initialize the app with VM binding
 function initApp() {
   ko.applyBindings(new ViewModel())
 }

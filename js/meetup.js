@@ -19,28 +19,36 @@ var Meetup = function(data, source) {
     this.fee = 0
   }
   
+  // Price formatted in English
   this.price = ko.computed( function() {
     return (this.fee > 0) ? `${this.fee}` : 'Free'
   }, this)
 
   this.visible = ko.observable(false)
 
-  this.contentString = `
-    <div class="info-window-content">
-      <div class="title"><b>${self.name}</b></div>
-      <div class="content">${self.description || ''}</div>
-      <div>${self.time.toDateString()} | ${self.price()}</div>
-    </div>
-  `
+  // Dynamic content for infoWindow
+  this.contentString = ko.computed(function() {
+    return `
+      <div class="info-window-content">
+        <div class="title"><b>${self.name}</b></div>
+        <div class="content">${self.description || ''}</div>
+        <div>${self.time.toDateString()} | ${self.price()}</div>
+      </div>
+    `
+  })
 
+  // Initialize infoWindow
   this.infoWindow = new google.maps.InfoWindow({content: self.contentString})
 
+  // Show InfoWindow
   this.showInfoWindow = function (content) {
-    var contentString = content || self.contentString
+    var contentString = content || self.contentString()
+    // Set new content for InfoWindow
     self.infoWindow.setContent(contentString)
     self.infoWindow.open(map, self.marker)
   }
 
+  // Initialize Marker
   this.marker = new google.maps.Marker({
     icon: makeMarkerIcon(),
     map: map,
@@ -49,6 +57,7 @@ var Meetup = function(data, source) {
     animation: google.maps.Animation.DROP,
   })
 
+  // Show Meetup Marker
   this.showMarker = ko.computed( function() {
     if (this.visible()) this.marker.setMap(map)
     else this.marker.setMap(null)
@@ -56,6 +65,8 @@ var Meetup = function(data, source) {
   }, this)
 }
 
+// Generate light-red icon for Meetup markers
+// to differentiate from Stations
 function makeMarkerIcon() {
   let markerColor = 'ffcdd2'
   var markerImage = new google.maps.MarkerImage(
