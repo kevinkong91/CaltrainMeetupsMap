@@ -1364,4 +1364,4 @@ var data = {
     "offset": 0,
     "next": "https:\/\/transit.land\/api\/v1\/stops?offset=50&per_page=50&served_by=o-9q9-caltrain&sort_key=id&sort_order=asc"
   }
-}
+};
