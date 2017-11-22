@@ -55,7 +55,6 @@ var ViewModel = function () {
   this.selectStation = function(station) {
     // Move map to selected station
     map.setCenter(station.marker.position)
-    map.setZoom(12)
 
     // Clear all previous details
     self.clearAllDetails()
@@ -68,12 +67,10 @@ var ViewModel = function () {
   // Clear all infoWindows and meetups
   this.clearAllDetails = function() {
     self.stationsList().forEach(function(station) {
-      // Close station info
+      // Close station infoWindow
       station.infoWindow.close()
-      // Close all nearby meetup info
-      station.meetupsList().forEach(function(meetup) {
-        meetup.visible(false)
-      })
+      // Close all nearby meetup Markers
+      station.hideMeetupMarkers()
     })
   }
 
@@ -169,13 +166,17 @@ var ViewModel = function () {
   // Only displaying the exact item results that user type if available in the locationlist array.
   this.filteredList = ko.computed( function() {
     return ko.utils.arrayFilter(self.stationsList(), function(station) {
+      // Hide all Meetup markers
+      station.hideMeetupMarkers()
+      
+      // Default: show all stations
       var resultZone = true
       var resultFilter = true
-      // Check zone filter
+      // Filter out by zone
       if (typeof self.selectedZone() === 'number') {
         resultZone = (self.selectedZone() == station.zoneId)
       }
-      // Check string query filter
+      // Filter out by query string match
       var filter = self.searchQuery().toLowerCase()
       if (filter) {
         var string = station.name.toLowerCase()

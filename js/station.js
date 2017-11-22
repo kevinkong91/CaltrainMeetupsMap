@@ -176,15 +176,22 @@ var Station = function(data) {
     // Close the station infoWindow
     self.infoWindow.close()
     // Close other other Meetup infoWindows
-    self.hideAllMeetupInfoWindows()
+    self.hideMeetupInfoWindows()
     // Show this meetup's infoWindow
     meetup.showInfoWindow()
   }
 
   // Hide all other Meetup infoWindows
-  this.hideAllMeetupInfoWindows = function() {
+  this.hideMeetupInfoWindows = function() {
     self.meetupsList().forEach(function(meetup) {
       meetup.infoWindow.close()
+    })
+  }
+
+  // Hide all Meetup markers
+  this.hideMeetupMarkers = function () {
+    self.meetupsList().forEach(function(meetup) {
+      meetup.visible(false)
     })
   }
 }
