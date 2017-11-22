@@ -15,8 +15,8 @@
       <div class="">
         <div id="map"></div>
         <div class="stations-box">
-          <h6>Caltrain Stations</h6>
-          <ul id="stations-list" data-bind="foreach: filteredList">
+          <b>Caltrain Stations</b>
+          <ul data-bind="foreach: filteredList">
             <li data-bind="event: { click: $root.selectStation }">
               <a href="#" data-bind="text: name"></a>
             </li>
