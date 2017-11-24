@@ -134,7 +134,6 @@ var ViewModel = function () {
     // routes between all our markers, and the destination address entered
     // by the user. Then put all the origins into an origin matrix.
     var mode = self.searchRadiusMode();
-    var foundMatchingStations = false;
 
     var origins = self.stationsList().map(function(station){
       return station.marker.position;
@@ -191,7 +190,6 @@ var ViewModel = function () {
   };
 
   this.shouldDisplayMarkersWithinRadius = function(station) {
-    if (!self.isSearchingWithinRadius()) {console.log('within radius');return true;}
     return self.stationsWithinRadius().includes(station);
   };
 
@@ -221,7 +219,9 @@ var ViewModel = function () {
       }
 
       // Filter out by distance
-      matchesDistance = self.shouldDisplayMarkersWithinRadius(station);
+      if (self.isSearchingWithinRadius()) {
+        matchesDistance = self.shouldDisplayMarkersWithinRadius(station);
+      }
 
       // If user sets Zone && a string query, positive results should match both
       var shouldBeVisible = isInZone && matchesSearchTerm && matchesDistance;

@@ -69,7 +69,9 @@ var Station = function(data) {
     }, 800);
   };
 
+  //
   // Nearby Meetups via Meetup.com / Eventbrite
+  //
 
   this.findNearbyEvents = function() {
 
