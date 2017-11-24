@@ -21,12 +21,16 @@ var Station = function(data) {
 
   this.visible = ko.observable(true);
 
+  // Distance from center of Search Radius
+  this.distanceFromSearchAddress = ko.observable();
+
   // Dynamic infoWindow content
   this.contentString = ko.computed(function() {
     return `
       <div class="info-window-content">
         <div class="title"><b>${self.name}</b></div>
         <div class="content">Zone ${self.zoneId}</div>
+        <div>${self.distanceFromSearchAddress()}</div>
         <div>${self.meetupSummary()}</div>
       </div>
     `;
@@ -36,10 +40,9 @@ var Station = function(data) {
   this.infoWindow = new google.maps.InfoWindow({content: self.contentString()});
 
   // Show InfoWindow
-  this.showInfoWindow = function (content) {
-    var contentString = content || self.contentString();
+  this.showInfoWindow = function () {
     // Set new content for InfoWindow
-    self.infoWindow.setContent(contentString);
+    self.infoWindow.setContent(self.contentString());
     self.infoWindow.open(map, self.marker);
     self.bounceAnimate();
   };
@@ -53,8 +56,8 @@ var Station = function(data) {
 
   // Show Marker if visible
   this.showMarker = ko.computed( function() {
-    if (this.visible()) this.marker.setMap(map);
-    else this.marker.setMap(null);
+    if (this.visible()) this.marker.setVisible(true);
+    else this.marker.setVisible(false);
     return true;
   }, this);
 

@@ -3,7 +3,8 @@ var map;
 var ViewModel = function () {
   var self = this;
 
-  this.searchQuery = ko.observable('');
+  this.searchTerm = ko.observable('');
+
   this.stationsList = ko.observableArray([]);
 
   // Initialize Google Map object
@@ -46,7 +47,7 @@ var ViewModel = function () {
 
   // Clear all set filters
   this.clearFilters = function() {
-    this.searchQuery('');
+    this.searchTerm('');
     this.selectedZone(null);
     self.clearAllDetails();
   };
@@ -85,47 +86,58 @@ var ViewModel = function () {
   this.zones = ko.observableArray([ 1, 2, 3, 4 ]);
   this.selectedZone = ko.observable();
 
-  // Search Within Time
-  this.stationsWithinTime = ko.observableArray([]);
-
-  this.searchWithinTime = function() {
-    // Clear previous results
-    self.stationsWithinTime([]);
-    // Initialize GoogleMaps DistanceMatrix
-    var distanceMatrixService = new google.maps.DistanceMatrixService;
-    var address = $('#search-within-time-text').val();
-    
-    if (address == '') {
-      // Handle invalid input
-      window.alert('You must enter an address.');
-    } else {
-      // Clear all previous markers
-      self.hideStationMarkers();
-      // Use the distance matrix service to calculate the duration of the
-      // routes between all our markers, and the destination address entered
-      // by the user. Then put all the origins into an origin matrix.
-      var mode = $('#mode').val();
-      var origins = self.stationsList().map(function(station) {
-        return station.marker.position;
-      });
-      distanceMatrixService.getDistanceMatrix({
-        origins: origins,
-        destinations: [address],
-        travelMode: google.maps.TravelMode[mode],
-        unitSystem: google.maps.UnitSystem.IMPERIAL,
-      }, function(response, status) {
-        if (status !== google.maps.DistanceMatrixStatus.OK) {
-          window.alert('Error was: ' + status);
-        } else {
-          // Success response
-          self.displayMarkersWithinTime(response);
-        }
-      });
-    }
+  // Search Within Radius
+  this.isSearchingWithinRadius = ko.observable(false);
+  this.toggleSearchingWithinRadius = function() {
+    let reverse = !this.isSearchingWithinRadius();
+    self.isSearchingWithinRadius(reverse);
+    if (!reverse) this.clearAllDetails();
   };
 
-  this.displayMarkersWithinTime = function(response) {
-    var maxDuration = $('#max-duration').val();
+  this.shouldSearchWithinRadius = ko.observable(false);
+
+  this.searchRadiusTime = ko.observable();
+  this.searchRadiusMode = ko.observable('');
+  this.searchRadiusAddress = ko.observable('');
+
+  searchBox.addListener('places_changed', function() {
+    let places = searchBox.getPlaces();
+    if (places.length == 0) return;
+    let place = places[0];
+    let address = place.formatted_address
+    self.searchRadiusAddress(address);
+  });
+
+  this.shouldDisplayMarkersWithinRadius = function(stationPosition, setMatchesDistance) {
+    // Initialize GoogleMaps DistanceMatrix
+    var distanceMatrixService = new google.maps.DistanceMatrixService;
+    var address = this.searchRadiusAddress();
+    
+    // Use the distance matrix service to calculate the duration of the
+    // routes between all our markers, and the destination address entered
+    // by the user. Then put all the origins into an origin matrix.
+    var mode = self.searchRadiusMode();
+    var foundMatchingStations = false;
+
+    distanceMatrixService.getDistanceMatrix({
+      origins: [stationPosition],
+      destinations: [address],
+      travelMode: google.maps.TravelMode[mode],
+      unitSystem: google.maps.UnitSystem.IMPERIAL,
+    }, function(response, status) {
+      if (status !== google.maps.DistanceMatrixStatus.OK) {
+        window.alert('Error was: ' + status);
+        foundMatchingStations = true;
+      } else {
+        // Success response
+        foundMatchingStations = self.filterStationsWithinRadius(response);
+      }
+      setMatchesDistance(foundMatchingStations);
+    });
+  };
+
+  this.filterStationsWithinRadius = function(response) {
+    var maxDuration = self.searchRadiusTime();
     var origins = response.originAddresses;
     // Parse through the results, and get the distance and duration of each.
     // Because there might be  multiple origins and destinations we have a nested loop
@@ -145,22 +157,17 @@ var ViewModel = function () {
           var duration = element.duration.value / 60;
           var durationText = element.duration.text;
           if (duration <= maxDuration) {
-            //the origin [i] should = the markers[i]
-            self.stationsList()[i].visible(true);
             atLeastOne = true;
             // Create a mini infowindow to open immediately and contain the
             // distance and duration
-            var content = `<b>${self.stationsList()[i].name}</b><br>${durationText} away, ${distanceText}`;
-            self.stationsList()[i].showInfoWindow(content);
+            let distance = `${durationText} away, ${distanceText}`
+            self.stationsList()[i].distanceFromSearchAddress(distance);
           }
         }
       });
     }
-    if (!atLeastOne) {
-      // No matching results found
-      window.alert('We could not find any locations within that distance!');
-    }
-  }
+    return atLeastOne;
+  };
 
   // Searches for what user typed in the input bar using the locationlist array.
   // Only displaying the exact item results that user type if available in the locationlist array.
@@ -172,7 +179,8 @@ var ViewModel = function () {
       
       // Default: show all stations
       var isInZone = true;
-      var matchesSearchQuery = true;
+      var matchesSearchTerm = true;
+      var matchesDistance = true;
 
       // Filter out by zone
       if (typeof self.selectedZone() === 'number') {
@@ -180,14 +188,27 @@ var ViewModel = function () {
       }
 
       // Filter out by query string match
-      var filter = self.searchQuery().toLowerCase();
+      var filter = self.searchTerm().toLowerCase();
       if (filter) {
         var string = station.name.toLowerCase();
-        matchesSearchQuery = (string.search(filter) >= 0);
+        matchesSearchTerm = (string.search(filter) >= 0);
       }
 
+      // Filter out by distance
+      var setMatchesDistance = function (result) {
+        console.log('matchesDistance1', result)
+        matchesDistance = result;
+      }
+      if (self.isSearchingWithinRadius() && self.searchRadiusAddress() == '') {
+        // Handle invalid input
+        window.alert('You must enter an address.');
+      } else if (self.isSearchingWithinRadius()) {
+        self.shouldDisplayMarkersWithinRadius(station.marker.position, setMatchesDistance)
+      }
+
+      console.log('matchesDistance2', matchesDistance)
       // If user sets Zone && a string query, positive results should match both
-      var shouldBeVisible = isInZone && matchesSearchQuery;
+      var shouldBeVisible = isInZone && matchesSearchTerm && matchesDistance;
 
       // Show/hide station
       station.visible(shouldBeVisible);
@@ -201,7 +222,11 @@ var ViewModel = function () {
       // Return result
       return shouldBeVisible;
     })
-  }, self);
+  }).extend({ rateLimit: 50 });
+}
+
+function onMapError() {
+  $('#map').html("<div><h1>Failed to load Google Maps</h1></div>");
 }
 
 // Initialize the app with VM binding

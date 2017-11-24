@@ -33,7 +33,7 @@
               </ul>
               <form class="col s7 m8 l10">
                 <div class="input-field">
-                  <input class="text" required placeholder="Search for a station" data-bind="textInput: searchQuery, valueUpdate: 'afterkeydown'">
+                  <input class="text" required placeholder="Search for a station" data-bind="textInput: searchTerm, valueUpdate: 'afterkeydown'">
                 </div>
               </form>
               <ul class="right hide-on-sm-and-down red lighten-1">
@@ -62,21 +62,24 @@
           <hr>
           <div>
             <span class="text"> Within </span>
-            <select class="browser-default" id="max-duration">
+            <i class="material-icons right remove-filter" data-bind="if: isSearchingWithinRadius, click: toggleSearchingWithinRadius">close</i>
+            <span class="right text" data-bind="if: isSearchingWithinRadius">Remove Filter</span>
+            <!-- <span class="text right" data-bind="if: isSearchingWithinRadius">Remove Filter</span> -->
+            <select class="browser-default" data-bind="value: searchRadiusTime, disable: isSearchingWithinRadius">
               <option value="10">10 min</option>
               <option value="15">15 min</option>
               <option value="30">30 min</option>
               <option value="60">1 hour</option>
             </select>
-            <select class="browser-default" id="mode">
+            <select class="browser-default" data-bind="value: searchRadiusMode, disable: isSearchingWithinRadius">
               <option value="DRIVING">drive</option>
               <option value="WALKING">walk</option>
               <option value="BICYCLING">bike</option>
               <option value="TRANSIT">transit ride</option>
             </select>
             <span class="text">of</span>
-            <input id="search-within-time-text" type="text" placeholder="Ex: Google HQ, AT&T Stadium">
-            <button class="btn waves-effect waves-light red lighten-1" type="button" name="action" data-bind="click: searchWithinTime">Search
+            <input id="search-within-time-text" type="text" placeholder="Ex: Google HQ, AT&T Stadium" data-bind="textInput: searchRadiusAddress, valueUpdate: 'afterkeydown', disable: isSearchingWithinRadius">
+            <button class="btn waves-effect waves-light red lighten-1" type="button" name="action" data-bind="click: toggleSearchingWithinRadius">Search
               <i class="material-icons right">search</i>
             </button>
           </div>
@@ -94,6 +97,7 @@
     <script src="js/viewmodel.js"></script>
     <script async defer
       src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyC0nBQf636hCPm7hkkg24cH6J3AeHoM78M&v=3&callback=initApp">
+      onerror="onMapError"
     </script>
   </body>
 </html>

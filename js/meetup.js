@@ -59,8 +59,8 @@ var Meetup = function(data, source) {
 
   // Show Meetup Marker
   this.showMarker = ko.computed( function() {
-    if (this.visible()) this.marker.setMap(map);
-    else this.marker.setMap(null);
+    if (this.visible()) this.marker.setVisible(true);
+    else this.marker.setVisible(false);
     return true;
   }, this);
 };
