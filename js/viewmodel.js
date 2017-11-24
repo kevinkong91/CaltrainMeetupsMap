@@ -242,7 +242,7 @@ var ViewModel = function () {
 }
 
 function onMapError() {
-  $('#map').html("<div><h1>Failed to load Google Maps</h1></div>");
+  alert("Google Maps has failed to load. Please check your internet connection and try again.");
 }
 
 // Initialize the app with VM binding
