@@ -82,6 +82,7 @@
             <button class="btn waves-effect waves-light red lighten-1" type="button" name="action" data-bind="disable: isSearchingWithinRadius, click: searchWithinRadius">Search
               <i class="material-icons right">search</i>
             </button>
+            <span class="right text" data-bind="if: hasNoStationsWithinRadius">No Results</span>
           </div>
           <hr>
         </div>

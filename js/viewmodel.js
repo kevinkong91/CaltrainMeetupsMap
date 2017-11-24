@@ -108,6 +108,11 @@ var ViewModel = function () {
     self.searchRadiusAddress(address);
   });
 
+  // "No Results" UI Feedback for SearchWithinRadius
+  self.hasNoStationsWithinRadius = ko.computed(function() {
+    return (self.isSearchingWithinRadius() && self.stationsWithinRadius().length == 0)
+  })
+
   // Stations that match Search Radius
   self.stationsWithinRadius = ko.observableArray([]);
 
@@ -122,9 +127,6 @@ var ViewModel = function () {
     // Toggle mode
     self.toggleSearchingWithinRadius(true)
     
-    // Clear previous results
-    self.stationsWithinRadius([]);
-
     var distanceMatrixService = new google.maps.DistanceMatrixService;
     var address = this.searchRadiusAddress();
     
@@ -160,6 +162,10 @@ var ViewModel = function () {
     // Because there might be  multiple origins and destinations we have a nested loop
     // Then, make sure at least 1 result was found.
     var bounds = new google.maps.LatLngBounds();
+
+    // Clear previous results
+    self.stationsWithinRadius([]);
+    
     for (var i = 0; i < origins.length; i++) {
       var results = response.rows[i].elements;
       results.forEach( function(element) {
