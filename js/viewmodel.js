@@ -94,12 +94,12 @@ var ViewModel = function () {
     if (!reverse) this.clearAllDetails();
   };
 
-  this.shouldSearchWithinRadius = ko.observable(false);
-
+  // Capture form input for Search Within Radius
   this.searchRadiusTime = ko.observable();
   this.searchRadiusMode = ko.observable('');
   this.searchRadiusAddress = ko.observable('');
 
+  // Capture selection from GoogleMaps SearchBox
   searchBox.addListener('places_changed', function() {
     let places = searchBox.getPlaces();
     if (places.length == 0) return;
@@ -108,8 +108,23 @@ var ViewModel = function () {
     self.searchRadiusAddress(address);
   });
 
-  this.shouldDisplayMarkersWithinRadius = function(stationPosition, setMatchesDistance) {
-    // Initialize GoogleMaps DistanceMatrix
+  // Stations that match Search Radius
+  self.stationsWithinRadius = ko.observableArray([]);
+
+  // Handle SearchWithinRadius Button
+  self.searchWithinRadius = function() {
+    if (self.isSearchingWithinRadius() && self.searchRadiusAddress() == '') {
+      // Handle invalid input
+      window.alert('You must enter an address.');
+      return;
+    }
+
+    // Toggle mode
+    self.toggleSearchingWithinRadius(true)
+    
+    // Clear previous results
+    self.stationsWithinRadius([]);
+
     var distanceMatrixService = new google.maps.DistanceMatrixService;
     var address = this.searchRadiusAddress();
     
@@ -119,20 +134,22 @@ var ViewModel = function () {
     var mode = self.searchRadiusMode();
     var foundMatchingStations = false;
 
+    var origins = self.stationsList().map(function(station){
+      return station.marker.position;
+    });
+
     distanceMatrixService.getDistanceMatrix({
-      origins: [stationPosition],
+      origins: origins,
       destinations: [address],
       travelMode: google.maps.TravelMode[mode],
       unitSystem: google.maps.UnitSystem.IMPERIAL,
     }, function(response, status) {
       if (status !== google.maps.DistanceMatrixStatus.OK) {
         window.alert('Error was: ' + status);
-        foundMatchingStations = true;
       } else {
         // Success response
-        foundMatchingStations = self.filterStationsWithinRadius(response);
+        self.filterStationsWithinRadius(response);
       }
-      setMatchesDistance(foundMatchingStations);
     });
   };
 
@@ -142,7 +159,6 @@ var ViewModel = function () {
     // Parse through the results, and get the distance and duration of each.
     // Because there might be  multiple origins and destinations we have a nested loop
     // Then, make sure at least 1 result was found.
-    var atLeastOne = false;
     var bounds = new google.maps.LatLngBounds();
     for (var i = 0; i < origins.length; i++) {
       var results = response.rows[i].elements;
@@ -157,16 +173,20 @@ var ViewModel = function () {
           var duration = element.duration.value / 60;
           var durationText = element.duration.text;
           if (duration <= maxDuration) {
-            atLeastOne = true;
             // Create a mini infowindow to open immediately and contain the
             // distance and duration
             let distance = `${durationText} away, ${distanceText}`
             self.stationsList()[i].distanceFromSearchAddress(distance);
+            self.stationsWithinRadius.push(self.stationsList()[i])
           }
         }
       });
     }
-    return atLeastOne;
+  };
+
+  this.shouldDisplayMarkersWithinRadius = function(station) {
+    if (!self.isSearchingWithinRadius()) {console.log('within radius');return true;}
+    return self.stationsWithinRadius().includes(station);
   };
 
   // Searches for what user typed in the input bar using the locationlist array.
@@ -195,18 +215,8 @@ var ViewModel = function () {
       }
 
       // Filter out by distance
-      var setMatchesDistance = function (result) {
-        console.log('matchesDistance1', result)
-        matchesDistance = result;
-      }
-      if (self.isSearchingWithinRadius() && self.searchRadiusAddress() == '') {
-        // Handle invalid input
-        window.alert('You must enter an address.');
-      } else if (self.isSearchingWithinRadius()) {
-        self.shouldDisplayMarkersWithinRadius(station.marker.position, setMatchesDistance)
-      }
+      matchesDistance = self.shouldDisplayMarkersWithinRadius(station);
 
-      console.log('matchesDistance2', matchesDistance)
       // If user sets Zone && a string query, positive results should match both
       var shouldBeVisible = isInZone && matchesSearchTerm && matchesDistance;
 

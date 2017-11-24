@@ -79,7 +79,7 @@
             </select>
             <span class="text">of</span>
             <input id="search-within-time-text" type="text" placeholder="Ex: Google HQ, AT&T Stadium" data-bind="textInput: searchRadiusAddress, valueUpdate: 'afterkeydown', disable: isSearchingWithinRadius">
-            <button class="btn waves-effect waves-light red lighten-1" type="button" name="action" data-bind="click: toggleSearchingWithinRadius">Search
+            <button class="btn waves-effect waves-light red lighten-1" type="button" name="action" data-bind="disable: isSearchingWithinRadius, click: searchWithinRadius">Search
               <i class="material-icons right">search</i>
             </button>
           </div>
