@@ -15,14 +15,14 @@ var Station = function(data) {
   this.meetupError = ko.observable();
 
   // Meetup text for checking error & count
-  this.meetupSummary = function() {
-    return (this.meetupError()) ? 'Error fetching meetups' : this.meetupCount();
-  };
+  this.meetupSummary = ko.computed(function() {
+    return (self.meetupError()) ? 'Error fetching meetups' : self.meetupCount();
+  });
 
   this.visible = ko.observable(true);
 
   // Distance from center of Search Radius
-  this.distanceFromSearchAddress = ko.observable();
+  this.distanceFromSearchAddress = ko.observable('');
 
   // Dynamic infoWindow content
   this.contentString = ko.computed(function() {
@@ -88,7 +88,7 @@ var Station = function(data) {
       lat: self.location.lat,
       lon: self.location.lng,
       radius: maxDistance,
-      time: ',2w' // Meetups in the next 2 weeks
+      time: ',4w' // Meetups in the next 2 weeks
     });
     let url = `${endpoint}?${params}`;
     $.ajax({
